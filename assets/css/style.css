@@ -1,0 +1,81 @@
+/* Custom CSS untuk MeetWithBalinese */
+
+/* Avatar */
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Match Card Hover Effect */
+.card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus Color for Form Elements */
+.form-control:focus,
+.form-select:focus {
+    border-color: #E63946;
+    box-shadow: 0 0 0 0.25rem rgba(230, 57, 70, 0.25);
+}
+
+/* Custom Button Hover */
+.btn-primary:hover {
+    background-color: #d62c3a;
+    border-color: #d62c3a;
+}
+
+/* Best Match Label */
+.border-warning {
+    border-width: 2px !important;
+}
+
+/* Progress Bar Animation */
+.progress-bar {
+    transition: width 1s ease-in-out;
+}
+
+/* Custom Card Header */
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Quiz Options Hover */
+.form-check:hover {
+    background-color: rgba(230, 57, 70, 0.05);
+    border-radius: 5px;
+}
+
+/* Footer Link Hover */
+footer a:hover {
+    color: #E63946 !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 20px;
+    }
+}
+
+/* Animation for Best Match Label */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.border-warning {
+    animation: pulse 2s infinite;
+} 
