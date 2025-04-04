@@ -6,8 +6,8 @@
             <div class="col-lg-6 mb-4 mb-lg-0">
                 <h1 class="display-4 fw-bold text-primary mb-3">Meet With Balinese</h1>
                 <div class="balinese-divider mb-4"></div>
-                <p class="lead mb-4">Platform kencan pertama di Bali yang memperhatikan nilai-nilai tradisional dan kepribadian.</p>
-                <p class="mb-4">Kami membantu Anda menemukan pasangan yang sesuai dengan kasta dan kepribadian Anda melalui metode yang menyenangkan dan tidak menghakimi.</p>
+                <p class="lead mb-4">Yuk cari kamu cocok sama siapa aja di Bali</p>
+                <p class="mb-4">Semua disini hanya untuk bersenang - senang, jangan lupa untuk bersikap baik ya</p>
                 
                 <?php if (!isset($has_taken_quiz) || !$has_taken_quiz): ?>
                     <div class="d-grid gap-2 d-md-flex">
@@ -16,8 +16,8 @@
                         </a>
                     </div>
                     <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle me-2"></i> Ikuti quiz untuk mengetahui kasta Anda dan menemukan kecocokan.
-                    </div>
+                        <i class="fas fa-info-circle me-2"></i> Ikuti quiz untuk mengetahui sifat kamu dan menemukan kecocokan.
+                    </div>  
                 <?php else: ?>
                     <div class="d-grid gap-2 d-md-flex">
                         <a href="<?= base_url('matches') ?>" class="btn btn-primary btn-lg">
@@ -54,7 +54,7 @@
                                 <i class="fas fa-user-edit"></i>
                             </div>
                             <h4>Buat Profil</h4>
-                            <p>Daftar dan buat profil Anda dengan informasi dasar untuk mulai mencari kecocokan.</p>
+                            <p>Daftar dan buat profil kamu dengan informasi dasar untuk mulai mencari kecocokan.</p>
                         </div>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                                 <i class="fas fa-question-circle"></i>
                             </div>
                             <h4>Ikuti Quiz</h4>
-                            <p>Jawab pertanyaan fun untuk mengidentifikasi kasta dan kepribadian Anda.</p>
+                            <p>Jawab pertanyaan fun untuk mengidentifikasi kepribadian kamu <strong>(V1.0 hanya untuk orang bali asli)</strong> update soon untuk orang bukan asli bali.</p>
                         </div>
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                                 <i class="fas fa-heart"></i>
                             </div>
                             <h4>Temukan Kecocokan</h4>
-                            <p>Kami akan mencocokkan Anda dengan orang yang sesuai berdasarkan kasta dan kepribadian.</p>
+                            <p>Kami akan mencocokkan kamu dengan orang yang sesuai berdasarkan  kepribadian kamu.</p>
                         </div>
                     </div>
                 </div>
