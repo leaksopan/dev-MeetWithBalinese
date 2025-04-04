@@ -30,7 +30,10 @@ class Auth extends MY_Controller {
             redirect('home');
         }
         
+        $data['title'] = 'Login';
+        $this->load->view('templates/header', $data);
         $this->load->view('auth/login');
+        $this->load->view('templates/footer');
     }
 
     /**
@@ -43,7 +46,10 @@ class Auth extends MY_Controller {
 
         if ($this->form_validation->run() == FALSE) {
             // Jika validasi gagal, kembali ke form login dengan error
+            $data['title'] = 'Login';
+            $this->load->view('templates/header', $data);
             $this->load->view('auth/login');
+            $this->load->view('templates/footer');
         } else {
             // Ambil input dari form
             $email = $this->input->post('email');
@@ -67,7 +73,10 @@ class Auth extends MY_Controller {
             } else {
                 // Login gagal
                 $this->session->set_flashdata('error', 'Email atau password salah');
+                $data['title'] = 'Login';
+                $this->load->view('templates/header', $data);
                 $this->load->view('auth/login');
+                $this->load->view('templates/footer');
             }
         }
     }
@@ -81,7 +90,10 @@ class Auth extends MY_Controller {
             redirect('home');
         }
         
+        $data['title'] = 'Register';
+        $this->load->view('templates/header', $data);
         $this->load->view('auth/register');
+        $this->load->view('templates/footer');
     }
 
     /**
@@ -100,7 +112,10 @@ class Auth extends MY_Controller {
 
         if ($this->form_validation->run() == FALSE) {
             // Jika validasi gagal, kembali ke form register dengan error
+            $data['title'] = 'Register';
+            $this->load->view('templates/header', $data);
             $this->load->view('auth/register');
+            $this->load->view('templates/footer');
         } else {
             // Ambil input dari form
             $data = [
@@ -117,7 +132,10 @@ class Auth extends MY_Controller {
             $existing_email = $this->db->get_where('users', ['email' => $data['email']])->row();
             if ($existing_email) {
                 $this->session->set_flashdata('error', 'Email sudah terdaftar. Silakan gunakan email lain.');
+                $view_data['title'] = 'Register';
+                $this->load->view('templates/header', $view_data);
                 $this->load->view('auth/register');
+                $this->load->view('templates/footer');
                 return;
             }
 
@@ -131,7 +149,10 @@ class Auth extends MY_Controller {
             } else {
                 // Registrasi gagal
                 $this->session->set_flashdata('error', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.');
+                $view_data['title'] = 'Register';
+                $this->load->view('templates/header', $view_data);
                 $this->load->view('auth/register');
+                $this->load->view('templates/footer');
             }
         }
     }

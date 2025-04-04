@@ -1,12 +1,18 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<div class="row justify-content-center">
+<div class="row justify-content-center my-5">
     <div class="col-md-8 col-lg-6">
-        <div class="card mt-4">
-            <div class="card-header bg-white text-center py-3">
-                <h4 class="mb-0">Registrasi Akun Baru</h4>
-            </div>
-            <div class="card-body p-4">
+        <div class="text-center mb-4">
+            <h1 class="display-4">Meet With Balinese</h1>
+            <p class="lead">Temukan pasangan yang sesuai kasta di Pulau Dewata</p>
+            <div class="balinese-divider"></div>
+        </div>
+        
+        <div class="auth-form">
+            <div class="auth-form-content">
+                <div class="text-center mb-4">
+                    <h2 class="auth-title">Daftar Akun Baru</h2>
+                </div>
                 
                 <?php echo form_open('auth/process_register'); ?>
                     
@@ -69,7 +75,7 @@
                         <label class="form-check-label" for="terms">Saya setuju dengan <a href="#" class="text-decoration-none">Syarat & Ketentuan</a></label>
                     </div>
                     
-                    <div class="d-grid gap-2">
+                    <div class="d-grid gap-2 mt-4">
                         <button type="submit" class="btn btn-primary">Daftar</button>
                     </div>
                 

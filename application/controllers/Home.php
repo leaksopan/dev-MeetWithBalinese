@@ -20,6 +20,7 @@ class Home extends CI_Controller {
         parent::__construct();
         $this->load->helper(['url']);
         $this->load->library(['session']);
+        $this->load->model('User_model');
     }
 
     /**
@@ -33,6 +34,9 @@ class Home extends CI_Controller {
         
         // Ambil data user dari session
         $data['user'] = $this->session->userdata();
+        
+        // Cek apakah user sudah mengambil quiz kasta
+        $data['has_taken_quiz'] = $this->User_model->has_kasta_result($this->session->userdata('user_id'));
         
         // Load view
         $this->load->view('templates/header');

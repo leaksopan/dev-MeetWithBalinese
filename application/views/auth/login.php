@@ -1,12 +1,18 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<div class="row justify-content-center">
+<div class="row justify-content-center my-5">
     <div class="col-md-6 col-lg-5">
-        <div class="card mt-4">
-            <div class="card-header bg-white text-center py-3">
-                <h4 class="mb-0">Login</h4>
-            </div>
-            <div class="card-body p-4">
+        <div class="text-center mb-4">
+            <h1 class="display-4">Meet With Balinese</h1>
+            <p class="lead">Temukan pasangan yang sesuai kasta di Pulau Dewata</p>
+            <div class="balinese-divider"></div>
+        </div>
+        
+        <div class="auth-form">
+            <div class="auth-form-content">
+                <div class="text-center mb-4">
+                    <h2 class="auth-title">Masuk</h2>
+                </div>
                 
                 <?php echo form_open('auth/login'); ?>
                     
@@ -22,8 +28,8 @@
                         <?php echo form_error('password', '<small class="text-danger">', '</small>'); ?>
                     </div>
                     
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Login</button>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Masuk</button>
                     </div>
                 
                 <?php echo form_close(); ?>
@@ -35,8 +41,7 @@
         </div>
         
         <div class="text-center mt-4">
-            <h5>MeetWithBalinese</h5>
-            <p class="text-muted">Temukan pasangan yang sesuai dengan kasta Anda di Bali.</p>
+            <p class="text-muted">© <?= date('Y') ?> MeetWithBalinese - Temukan pasangan yang sesuai dengan kasta Anda di Bali.</p>
         </div>
     </div>
 </div> 
