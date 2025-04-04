@@ -107,10 +107,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php if(isset($match_user_linear_position)): ?>
                             <div class="alert alert-info mt-3">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>Posisi: <?= $match_user_linear_position ?>/12</strong>
+                                <strong>Posisi Kepribadian</strong>
                                 <div class="progress mt-2" style="height: 10px;">
                                     <?php 
-                                    // Hitung persentase dari posisi (1-12) untuk progress bar
+                                    // Hitung persentase dari posisi untuk progress bar
                                     $progress_percent = (($match_user_linear_position - 1) / 11) * 100;
                                     ?>
                                     <div class="progress-bar bg-primary" role="progressbar" 
@@ -123,18 +123,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             
                             <?php if(isset($user_linear_position)): ?>
                             <div class="alert alert-secondary mt-3">
-                                <strong>Perbandingan dengan Anda</strong>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <span class="small">Anda: <?= $user_linear_position ?>/12</span>
-                                    <span class="small">Pencocokan: <?= $match_user_linear_position ?>/12</span>
-                                </div>
+                                <strong>Perbandingan Kepribadian</strong>
                                 <?php if ($match_score == 0): ?>
                                 <div class="alert alert-warning mt-2 mb-0">
                                     <i class="fas fa-exclamation-triangle me-2"></i>
                                     Belum ada skor kecocokan. Salah satu dari Anda belum mengisi quiz.
                                 </div>
                                 <?php else: ?>
-                                <div class="progress mt-1" style="height: 15px;">
+                                <div class="progress mt-3" style="height: 15px;">
                                     <?php 
                                     // Posisi marker pada skala 0-100%
                                     $user_marker = (($user_linear_position - 1) / 11) * 100;
@@ -147,7 +143,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                          style="width: 2%; position: absolute; left: <?= $match_marker ?>%">
                                     </div>
                                 </div>
-                                <p class="small mt-2 mb-0">Perbedaan <?= abs($user_linear_position - $match_user_linear_position) ?> tingkat = pengurangan <?= abs($user_linear_position - $match_user_linear_position) * 8.33 ?>% kecocokan</p>
+                                <p class="small mt-2 mb-0">Kecocokan kepribadian Anda: <strong class="text-primary"><?= number_format($match_score, 1) ?>%</strong></p>
                                 <?php endif; ?>
                             </div>
                             <?php endif; ?>

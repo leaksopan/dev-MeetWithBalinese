@@ -17,10 +17,10 @@
             <h5 class="card-title mb-0">Kecocokan Berdasarkan Kepribadian Bali</h5>
         </div>
         <div class="card-body">
-            <p>Sistem kami mencocokkan Anda dengan pengguna lain berdasarkan posisi kepribadian (1-12) dari hasil quiz kepribadian Bali.</p>
-            <?php if(isset($user_linear_position) && isset($user_linear_position_name)): ?>
+            <p>Sistem kami mencocokkan Anda dengan pengguna lain berdasarkan posisi kepribadian dari hasil quiz kepribadian Bali.</p>
+            <?php if(isset($user_linear_position)): ?>
                 <div class="alert alert-info">
-                    <strong>Posisi Anda: <?= $user_linear_position ?>/12</strong>
+                    <strong>Posisi Kepribadian Anda</strong>
                     <div class="progress mt-2" style="height: 10px;">
                         <?php 
                         // Hitung persentase dari posisi linear untuk progress bar
@@ -32,7 +32,7 @@
                             aria-valuemin="1" aria-valuemax="12">
                         </div>
                     </div>
-                    <p class="small mt-2 mb-0">Setiap perbedaan 1 tingkat posisi = pengurangan kecocokan sebesar 8.33%</p>
+                    <p class="small mt-2 mb-0">Semakin dekat posisi kepribadian, semakin tinggi persentase kecocokan.</p>
                 </div>
             <?php else: ?>
                 <div class="alert alert-warning">
@@ -134,26 +134,16 @@
                             </div>
                         </div>
                         
-                        <div class="match-info mb-3">
-                            <?php if(isset($match->linear_position)): ?>
-                            <div class="d-flex justify-content-between">
-                                <span>Posisi</span>
-                                <span class="fw-bold text-secondary"><?= $match->linear_position ?>/12</span>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        
                         <div class="progress mb-4">
                             <?php if($match->match_score > 0): ?>
                                 <div class="progress-bar bg-primary" role="progressbar" style="width: <?= $match->match_score ?>%"></div>
                                 <?php if(isset($match->linear_position)): ?>
                                     <?php
-                                    // Tambahkan marker untuk menunjukkan posisi linear
+                                    // Tambahkan marker untuk menunjukkan posisi
                                     $marker_position = min(95, (($match->linear_position - 1) / 11) * 100);
                                     ?>
                                     <div class="progress-bar bg-warning" role="progressbar" 
-                                         style="width: 2%; position: absolute; left: <?= $marker_position ?>%"
-                                         title="Posisi: <?= $match->linear_position ?>/12">
+                                         style="width: 2%; position: absolute; left: <?= $marker_position ?>%">
                                     </div>
                                 <?php endif; ?>
                             <?php else: ?>
