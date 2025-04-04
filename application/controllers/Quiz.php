@@ -74,8 +74,16 @@ class Quiz extends CI_Controller {
             $kasta_id = $this->quiz_model->calculate_kasta_result($user_id);
             log_message('debug', 'Kasta result calculated for user_id: ' . $user_id . ', kasta_id: ' . $kasta_id);
             
+            // Load model match untuk recalculate match scores
+            $this->load->model('match_model');
+            
+            // Update match scores untuk user ini
+            $this->db->where('user_id_1', $user_id)->or_where('user_id_2', $user_id);
+            $this->db->delete('matches');
+            log_message('debug', 'Deleted old matches for user_id: ' . $user_id);
+            
             // Redirect langsung ke halaman matches
-            $this->session->set_flashdata('success', 'Quiz berhasil diselesaikan! Berikut adalah daftar kecocokan untuk Anda.');
+            $this->session->set_flashdata('success', 'Quiz berhasil diselesaikan! Kasta dan kecocokan telah diperbarui.');
             redirect('matches');
         } else {
             log_message('debug', 'Quiz submission failed: no POST data');

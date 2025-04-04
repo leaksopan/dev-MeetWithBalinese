@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Migration Controller
  * 
- * Controller untuk melakukan migrasi database
+ * Controller untuk mengelola migrasi database
  * 
  * @package     MeetWithBalinese
  * @subpackage  Controllers
@@ -12,74 +12,107 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author      MeetWithBalinese Team
  */
 class Migration extends CI_Controller {
-    
+
     /**
      * Konstruktor
      */
     public function __construct() {
         parent::__construct();
+        $this->load->helper(['url', 'file']);
+        $this->load->library(['session']);
         $this->load->database();
+        
+        // Hanya admin yang bisa akses
+        if ($this->session->userdata('user_role') != 'admin') {
+            $this->session->set_flashdata('error', 'Hanya admin yang bisa mengakses halaman ini.');
+            redirect('home');
+        }
     }
-    
+
     /**
-     * Index
-     * 
-     * Menampilkan daftar migrasi yang tersedia
+     * Halaman utama
      */
     public function index() {
-        echo "<h1>Migrations</h1>";
-        echo "<ul>";
-        echo "<li><a href='" . site_url('migration/add_linear_position') . "'>Add Linear Position Column</a></li>";
-        echo "</ul>";
-    }
-    
-    /**
-     * Menambahkan kolom linear_position ke tabel userkastaresult
-     */
-    public function add_linear_position() {
-        echo "<h1>Migration: Add Linear Position Column</h1>";
+        $data['migrations'] = $this->get_available_migrations();
         
-        try {
-            // Cek apakah kolom sudah ada
-            $query = $this->db->query("SHOW COLUMNS FROM userkastaresult LIKE 'linear_position'");
-            $exists = ($query->num_rows() > 0);
-            
-            if ($exists) {
-                echo "<p>Column 'linear_position' already exists.</p>";
-            } else {
-                // Tambah kolom
-                $this->db->query("ALTER TABLE userkastaresult ADD COLUMN linear_position INT DEFAULT NULL AFTER confidence_score");
-                echo "<p>Column 'linear_position' added successfully.</p>";
-                
-                // Update data yang sudah ada
-                echo "<p>Updating existing data...</p>";
-                
-                // Load model untuk update
-                $this->load->model('match_model');
-                
-                // Ambil semua user yang memiliki hasil kasta
-                $users = $this->db->get('userkastaresult')->result();
-                
-                $updated = 0;
-                foreach ($users as $user) {
-                    // Hitung posisi linear
-                    $linear_position = $this->match_model->get_user_sub_kasta($user->user_id);
-                    
-                    if ($linear_position !== false) {
-                        // Update record
-                        $this->db->where('user_id', $user->user_id);
-                        $this->db->update('userkastaresult', ['linear_position' => $linear_position]);
-                        $updated++;
-                    }
-                }
-                
-                echo "<p>Updated linear position for {$updated} users.</p>";
-            }
-            
-            echo "<p><a href='" . site_url('migration') . "'>Back to migrations</a></p>";
-            
-        } catch (Exception $e) {
-            echo "<p>Error: " . $e->getMessage() . "</p>";
+        $this->load->view('templates/header');
+        $this->load->view('migration/index', $data);
+        $this->load->view('templates/footer');
+    }
+
+    /**
+     * Jalankan migrasi tertentu
+     * 
+     * @param string $migration_file Nama file migrasi
+     */
+    public function run($migration_file = '') {
+        if (empty($migration_file)) {
+            $this->session->set_flashdata('error', 'File migrasi tidak ditemukan.');
+            redirect('migration');
         }
+
+        $migration_path = APPPATH . 'migrations/' . $migration_file;
+        
+        if (!file_exists($migration_path)) {
+            $this->session->set_flashdata('error', 'File migrasi tidak ditemukan.');
+            redirect('migration');
+        }
+
+        // Baca file SQL
+        $sql = file_get_contents($migration_path);
+        
+        // Jalankan SQL
+        $queries = explode(';', $sql);
+        $success = true;
+        $error_messages = [];
+        
+        foreach ($queries as $query) {
+            $query = trim($query);
+            if (!empty($query)) {
+                try {
+                    $this->db->query($query);
+                } catch (Exception $e) {
+                    $success = false;
+                    $error_messages[] = $e->getMessage();
+                }
+            }
+        }
+
+        if ($success) {
+            $this->session->set_flashdata('success', 'Migrasi berhasil dijalankan.');
+        } else {
+            $this->session->set_flashdata('error', 'Migrasi gagal: ' . implode(', ', $error_messages));
+        }
+        
+        redirect('migration');
+    }
+
+    /**
+     * Jalankan migrasi add_linear_position
+     */
+    public function add_updated_at() {
+        $this->run('add_updated_at_column.sql');
+    }
+
+    /**
+     * Mendapatkan daftar file migrasi yang tersedia
+     * 
+     * @return array Daftar file migrasi
+     */
+    private function get_available_migrations() {
+        $migrations = [];
+        $migration_path = APPPATH . 'migrations/';
+        
+        if (is_dir($migration_path)) {
+            $files = scandir($migration_path);
+            
+            foreach ($files as $file) {
+                if ($file != '.' && $file != '..' && pathinfo($file, PATHINFO_EXTENSION) == 'sql') {
+                    $migrations[] = $file;
+                }
+            }
+        }
+        
+        return $migrations;
     }
 } 

@@ -65,6 +65,13 @@
                             <a class="nav-link" href="<?= base_url('matches') ?>">Matches</a>
                         </li>
                         <?php endif; ?>
+                        
+                        <?php if ($this->session->userdata('user_role') == 'admin'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= base_url('matches/debug') ?>">Debug Kasta</a>
+                        </li>
+                        <?php endif; ?>
+                        
                         <li class="nav-item">
                             <a class="nav-link" href="<?= base_url('auth/logout') ?>">Logout</a>
                         </li>

@@ -88,6 +88,8 @@ class Match_model extends CI_Model {
 
             // Cek apakah ada pengguna lain untuk dicocokkan
             $this->db->where('user_id !=', $user_id);
+            // Filter hanya lawan jenis
+            $this->db->where('gender', $target_gender);
             $users_count = $this->db->count_all_results('users');
             
             if ($users_count == 0) {
@@ -103,6 +105,8 @@ class Match_model extends CI_Model {
             $this->db->from('users u');
             $this->db->join('userkastaresult ukr', 'u.user_id = ukr.user_id', 'inner');
             $this->db->where('u.user_id !=', $user_id);
+            // Filter hanya lawan jenis
+            $this->db->where('u.gender', $target_gender);
             $this->db->where('ukr.linear_position IS NOT NULL'); // Pastikan linear_position tidak NULL
             $this->db->where('ukr.linear_position >=', $linear_position - 2);
             $this->db->where('ukr.linear_position <=', $linear_position + 2);
@@ -116,6 +120,8 @@ class Match_model extends CI_Model {
             $this->db->from('users u');
             $this->db->join('userkastaresult ukr', 'u.user_id = ukr.user_id', 'inner');
             $this->db->where('u.user_id !=', $user_id);
+            // Filter hanya lawan jenis
+            $this->db->where('u.gender', $target_gender);
             $this->db->where('ukr.linear_position IS NOT NULL'); // Pastikan linear_position tidak NULL
             $this->db->where("(ukr.linear_position < " . ($linear_position - 2) . " OR ukr.linear_position > " . ($linear_position + 2) . ")");
             $this->db->limit($limit / 2, $offset);
@@ -130,11 +136,13 @@ class Match_model extends CI_Model {
             if (empty($all_matches)) {
                 log_message('debug', 'No matches found based on linear position, falling back to kasta_id');
                 
-                // Cari pengguna dengan kasta yang sama
+                // Cari pengguna dengan kasta yang sama dan gender lawan jenis
                 $this->db->select('u.*, ukr.kasta_id, ukr.confidence_score, ukr.linear_position');
                 $this->db->from('users u');
                 $this->db->join('userkastaresult ukr', 'u.user_id = ukr.user_id', 'left');
                 $this->db->where('u.user_id !=', $user_id);
+                // Filter hanya lawan jenis
+                $this->db->where('u.gender', $target_gender);
                 $this->db->order_by('RAND()');
                 $this->db->limit($limit, $offset);
                 $all_matches = $this->db->get()->result();
@@ -353,10 +361,18 @@ class Match_model extends CI_Model {
      */
     private function calculate_match_score_with_clustering($user1_id, $user2_id, $user1_profile = null) {
         try {
-            // Ambil data gender untuk user pertama
+            // Ambil data gender untuk user pertama dan kedua
             $user1 = $this->db->get_where('users', ['user_id' => $user1_id])->row();
-            if (!$user1) {
+            $user2 = $this->db->get_where('users', ['user_id' => $user2_id])->row();
+            
+            if (!$user1 || !$user2) {
                 return 0; // User tidak ditemukan
+            }
+            
+            // Pastikan hanya lawan jenis yang bisa dicocokkan
+            if ($user1->gender == $user2->gender) {
+                log_message('debug', "Cannot match users with same gender: $user1_id and $user2_id");
+                return 1; // Kembalikan nilai minimal 1% untuk match score
             }
             
             // Jika profil user pertama tidak disediakan, ambil dari database
@@ -469,6 +485,12 @@ class Match_model extends CI_Model {
                 $dominant_kasta = $kasta_id;
                 $dominant_proportion = $proportion;
             }
+        }
+        
+        // Cek jika Sudra (kasta_id=4) memiliki proporsi tertinggi, prioritaskan
+        if (isset($profile[4]) && $profile[4] >= 0.4) {
+            $dominant_kasta = 4;
+            $dominant_proportion = $profile[4];
         }
         
         // Konversi kasta dominan ke range posisi
@@ -687,6 +709,23 @@ class Match_model extends CI_Model {
                 return $match->match_score;
             }
             
+            // Ambil data gender untuk kedua user
+            $user1 = $this->db->get_where('users', ['user_id' => $user1_id])->row();
+            $user2 = $this->db->get_where('users', ['user_id' => $user2_id])->row();
+            
+            if (!$user1 || !$user2) {
+                log_message('debug', "One of the users not found: $user1_id or $user2_id");
+                return 1; // Nilai minimum jika user tidak ditemukan
+            }
+            
+            // Pastikan hanya lawan jenis yang bisa dicocokkan
+            if ($user1->gender == $user2->gender) {
+                log_message('debug', "Cannot match users with same gender: $user1_id and $user2_id");
+                // Simpan hasil match ke database dengan nilai minimal
+                $this->save_match($user1_id, $user2_id, 1);
+                return 1; // Nilai minimum 1% untuk match score
+            }
+            
             // Jika belum ada, hitung berdasarkan posisi linear
             $user1_position = $this->get_user_sub_kasta($user1_id);
             $user2_position = $this->get_user_sub_kasta($user2_id);
@@ -770,7 +809,7 @@ class Match_model extends CI_Model {
         if ($user_gender == 'Male' && $position_diff > 0) {
             // Semakin tinggi perbedaan kasta, semakin rendah peluang match
             // Formula: 1 - (perbedaan_kasta * faktor_penurunan)
-            $reduction_factor = 0.15; // 15% penurunan per tingkat kasta
+            $reduction_factor = 0.07; // 10% penurunan per tingkat kasta (diturunkan dari 15%)
             $scaling = 1 - ($position_diff * $reduction_factor);
             // Pastikan tidak kurang dari 0.01 (1%) dan tidak lebih dari 0.99 (99%)
             return max(0.01, min(0.99, $scaling));
@@ -814,7 +853,7 @@ class Match_model extends CI_Model {
             $match_kasta = $this->get_kasta_name_from_position($match_linear_position);
             $percentage = round((1 - $scaling_factor) * 100);
             
-            return "Sebagai $user_kasta mencari $match_kasta (${abs_diff} tingkat lebih tinggi), peluang match berkurang ${percentage}% (min 1%)";
+            return "Sebagai $user_kasta mencari $match_kasta (${abs_diff} tingkat lebih tinggi), peluang match berkurang ${percentage}% (10% per tingkat)";
         }
         
         // Jika perempuan mencari laki-laki dengan kasta lebih rendah
@@ -823,7 +862,7 @@ class Match_model extends CI_Model {
             $match_kasta = $this->get_kasta_name_from_position($match_linear_position);
             $percentage = round((1 - $scaling_factor) * 100);
             
-            return "Sebagai $user_kasta mencari $match_kasta (${abs_diff} tingkat lebih rendah), peluang match berkurang ${percentage}% (min 1%)";
+            return "Sebagai $user_kasta mencari $match_kasta (${abs_diff} tingkat lebih rendah), peluang match berkurang ${percentage}% (10% per tingkat)";
         }
         
         // Kasus lainnya
@@ -833,6 +872,101 @@ class Match_model extends CI_Model {
             } else {
                 return "Match memiliki kasta ${abs_diff} tingkat lebih rendah (max 99% match)";
             }
+        }
+    }
+
+    /**
+     * Menghitung ulang posisi kasta user tanpa clustering
+     * 
+     * @param int $user_id ID pengguna
+     * @return int|false Posisi baru dalam skala 1-12 atau false jika gagal
+     */
+    public function recalculate_user_kasta($user_id) {
+        try {
+            // Dapatkan jawaban user
+            $this->db->select('q.question_id, ao.option_id, ao.kasta_indicator, ao.weight');
+            $this->db->from('useranswers ua');
+            $this->db->join('questions q', 'ua.question_id = q.question_id');
+            $this->db->join('answeroptions ao', 'ua.selected_option_id = ao.option_id');
+            $this->db->where('ua.user_id', $user_id);
+            $user_answers = $this->db->get()->result();
+            
+            // Jika tidak ada jawaban, return false
+            if (empty($user_answers)) {
+                return false;
+            }
+            
+            // Buat profil user
+            $user_profile = array(
+                1 => 0, // Brahmana weight
+                2 => 0, // Ksatria weight
+                3 => 0, // Waisya weight
+                4 => 0  // Sudra weight
+            );
+            
+            // Isi profil user
+            foreach ($user_answers as $answer) {
+                // Berikan bobot ekstra untuk kasta Sudra
+                if ($answer->kasta_indicator == 4) {
+                    $user_profile[$answer->kasta_indicator] += $answer->weight * 1.5;
+                } else {
+                    $user_profile[$answer->kasta_indicator] += $answer->weight;
+                }
+            }
+            
+            // Log profil sebelum normalisasi
+            log_message('debug', 'User profile before normalization: ' . json_encode($user_profile));
+            
+            // Normalisasi profil user
+            $total_weight = array_sum($user_profile);
+            if ($total_weight <= 0) {
+                return false;
+            }
+            
+            foreach ($user_profile as $kasta => $weight) {
+                $user_profile[$kasta] = $weight / $total_weight;
+            }
+            
+            // Log profil setelah normalisasi
+            log_message('debug', 'User profile after normalization: ' . json_encode($user_profile));
+            
+            // Hitung posisi kasta menggunakan fungsi yang sudah dimodifikasi
+            $linear_position = $this->calculate_linear_position($user_profile);
+            
+            // Log hasil posisi linear
+            log_message('debug', 'Calculated linear position: ' . $linear_position);
+            
+            // Simpan hasil ke database
+            $user_kasta = $this->db->get_where('userkastaresult', ['user_id' => $user_id])->row();
+            if ($user_kasta) {
+                $this->db->where('user_id', $user_id);
+                $this->db->update('userkastaresult', ['linear_position' => $linear_position]);
+            } else {
+                // Jika belum ada hasil kasta, buat baru
+                $predicted_kasta = 4; // Default ke Sudra jika tidak dapat ditentukan
+                if ($linear_position >= 10) {
+                    $predicted_kasta = 1; // Brahmana
+                } else if ($linear_position >= 7) {
+                    $predicted_kasta = 2; // Ksatria
+                } else if ($linear_position >= 4) {
+                    $predicted_kasta = 3; // Waisya
+                }
+                
+                $this->db->insert('userkastaresult', [
+                    'user_id' => $user_id,
+                    'kasta_id' => $predicted_kasta,
+                    'confidence_score' => 100 * $user_profile[$predicted_kasta],
+                    'linear_position' => $linear_position,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+            
+            return $linear_position;
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in recalculate_user_kasta: ' . $e->getMessage());
+            return false;
         }
     }
 } 

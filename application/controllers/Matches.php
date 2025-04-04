@@ -245,9 +245,9 @@ class Matches extends CI_Controller {
     }
 
     /**
-     * Menghitung ulang posisi linear pengguna
+     * Recalculate posisi linear user
      * 
-     * @param int $user_id ID pengguna
+     * @param int $user_id ID user
      */
     public function recalculate($user_id) {
         // Pastikan user_id valid
@@ -263,11 +263,13 @@ class Matches extends CI_Controller {
         $this->db->where('user_id', $user_id);
         $this->db->update('userkastaresult', ['linear_position' => null]);
         
-        // Hitung ulang posisi linear
-        $linear_position = $this->match_model->get_user_sub_kasta($user_id);
+        // Hitung ulang posisi linear tanpa clustering
+        $linear_position = $this->match_model->recalculate_user_kasta($user_id);
         
         if ($linear_position !== false) {
-            $this->session->set_flashdata('success', 'Posisi linear berhasil dihitung ulang: ' . $linear_position);
+            // Ambil nama kasta
+            $kasta_name = $this->match_model->get_kasta_name_from_position($linear_position);
+            $this->session->set_flashdata('success', 'Posisi linear berhasil dihitung ulang: ' . $linear_position . ' (' . $kasta_name . ')');
         } else {
             $this->session->set_flashdata('error', 'Gagal menghitung ulang posisi linear.');
         }

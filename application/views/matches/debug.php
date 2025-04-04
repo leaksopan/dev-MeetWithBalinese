@@ -52,7 +52,8 @@
     </div>
     
     <div class="mt-4">
-        <a href="<?= base_url('migration/add_linear_position') ?>" class="btn btn-warning">Re-run Migration</a>
+        <a href="<?= base_url('migration') ?>" class="btn btn-warning">Run Migrations</a>
+        <a href="<?= base_url('migration/add_updated_at') ?>" class="btn btn-info">Add updated_at Column</a>
         <a href="<?= base_url('matches') ?>" class="btn btn-secondary">Back to Matches</a>
     </div>
 </div> 

@@ -237,8 +237,13 @@ class Quiz_model extends CI_Model {
             // Hitung confidence score (0-100)
             $confidence_score = ($total_weight > 0) ? ($max_score / $total_weight) * 100 : 0;
 
-            // Hitung sub-kasta berdasarkan proporsi kasta dominan
-            // Load model Match_model
+            // Normalisasi profil pengguna untuk perhitungan posisi linear
+            $user_profile = array();
+            foreach ($kasta_scores as $kasta_id => $score) {
+                $user_profile[$kasta_id] = ($total_weight > 0) ? $score / $total_weight : 0;
+            }
+            
+            // Load model Match_model untuk akses ke fungsi perhitungan posisi
             $this->load->model('match_model');
             
             // Buat profil pengguna berdasarkan persentase bobot kasta
@@ -247,30 +252,29 @@ class Quiz_model extends CI_Model {
                 $user_profile[$kasta_id] = ($total_weight > 0) ? $score / $total_weight : 0;
             }
             
+            // Reset linear position to force recalculation
+            $this->db->where('user_id', $user_id);
+            $this->db->update('userkastaresult', ['linear_position' => null]);
+            
+            // Hitung posisi linear baru
+            $linear_position = $this->match_model->recalculate_user_kasta($user_id);
+            
+            // Jika linear_position masih null, gunakan get_user_sub_kasta
+            if ($linear_position === false) {
+                $linear_position = $this->match_model->get_user_sub_kasta($user_id);
+            }
+            
             // Hitung sub-kasta
             $dominant_kasta_id = $predicted_kasta;
             $dominant_weight = ($total_weight > 0) ? $max_score / $total_weight : 0;
             
-            // Base sub-kasta (1, 4, 7, 10)
-            $base_sub_kasta = ($dominant_kasta_id - 1) * 3 + 1;
-            
-            // Tentukan level sub-kasta (1-3)
-            $sub_kasta_level = 1; // Default level terendah
-            if ($dominant_weight >= 0.8) {
-                $sub_kasta_level = 3; // Sangat dominan - level tertinggi
-            } else if ($dominant_weight >= 0.6) {
-                $sub_kasta_level = 2; // Cukup dominan - level menengah
-            }
-            
-            // Hitung sub_kasta_id final
-            $sub_kasta_id = $base_sub_kasta + $sub_kasta_level - 1;
-
             // Simpan hasil ke database
             $result_data = array(
                 'user_id' => $user_id,
                 'kasta_id' => $predicted_kasta,
-                'sub_kasta_id' => $sub_kasta_id,
-                'confidence_score' => $confidence_score
+                'confidence_score' => $confidence_score,
+                'linear_position' => $linear_position,
+                'updated_at' => date('Y-m-d H:i:s')
             );
             
             // Simpan hasilnya ke userkastaresult
@@ -281,10 +285,11 @@ class Quiz_model extends CI_Model {
                 $this->db->where('user_id', $user_id);
                 $this->db->update('userkastaresult', $result_data);
             } else {
+                $result_data['created_at'] = date('Y-m-d H:i:s');
                 $this->db->insert('userkastaresult', $result_data);
             }
             
-            log_message('debug', 'Calculated and saved kasta result for user_id: ' . $user_id . ' with kasta_id: ' . $predicted_kasta);
+            log_message('debug', 'Calculated and saved kasta result for user_id: ' . $user_id . ' with kasta_id: ' . $predicted_kasta . ' and linear_position: ' . $linear_position);
             
             return $predicted_kasta;
         } catch (Exception $e) {
@@ -382,76 +387,15 @@ class Quiz_model extends CI_Model {
                 $user_answers = $this->get_user_answers($user_id);
             }
             
-            // Jika masih kosong, return false
+            // Jika tidak ada jawaban, kembalikan false
             if (empty($user_answers)) {
                 return false;
             }
             
-            // Hitung skor untuk masing-masing kasta
-            $kasta_scores = array(
-                1 => 0, // Brahmana
-                2 => 0, // Ksatria
-                3 => 0, // Waisya
-                4 => 0  // Sudra
-            );
-
-            $total_weight = 0;
+            // Menggunakan calculate_kasta_result untuk menghindari duplikasi kode
+            $kasta_id = $this->calculate_kasta_result($user_id);
             
-            foreach ($user_answers as $answer) {
-                $kasta_scores[$answer->kasta_indicator] += $answer->weight;
-                $total_weight += $answer->weight;
-            }
-
-            // Tentukan kasta dengan skor tertinggi
-            $max_score = 0;
-            $predicted_kasta = 0;
-            
-            foreach ($kasta_scores as $kasta_id => $score) {
-                if ($score > $max_score) {
-                    $max_score = $score;
-                    $predicted_kasta = $kasta_id;
-                }
-            }
-
-            // Jika tidak ada kasta yang terprediksi, beri default
-            if ($predicted_kasta == 0) {
-                $predicted_kasta = $default_kasta;
-            }
-
-            // Hitung confidence score (0-100)
-            $confidence_score = ($total_weight > 0) ? ($max_score / $total_weight) * 100 : 0;
-
-            // Normalisasi profil pengguna untuk perhitungan posisi linear
-            $user_profile = array();
-            foreach ($kasta_scores as $kasta_id => $score) {
-                $user_profile[$kasta_id] = ($total_weight > 0) ? $score / $total_weight : 0;
-            }
-            
-            // Load model Match_model untuk akses ke fungsi perhitungan posisi
-            $this->load->model('match_model');
-            
-            // Hitung posisi dalam skala linear 1-12
-            $linear_position = $this->match_model->get_user_sub_kasta($user_id);
-            
-            // Mencoba simpan atau update hasil kasta
-            $existing_result = $this->db->get_where('userkastaresult', ['user_id' => $user_id])->row();
-            
-            $data = [
-                'user_id' => $user_id,
-                'kasta_id' => $predicted_kasta,
-                'confidence_score' => $confidence_score,
-                'linear_position' => $linear_position,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-            
-            if ($existing_result) {
-                $this->db->where('user_id', $user_id);
-                return $this->db->update('userkastaresult', $data);
-            } else {
-                $data['created_at'] = date('Y-m-d H:i:s');
-                return $this->db->insert('userkastaresult', $data);
-            }
-            
+            return ($kasta_id !== false);
         } catch (Exception $e) {
             log_message('error', 'Error in save_kasta_result: ' . $e->getMessage());
             return false;
