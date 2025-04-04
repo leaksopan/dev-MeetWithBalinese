@@ -89,7 +89,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 </div>
                 
                 <?php 
-                // Dapatkan hasil kasta pengguna
+                // Dapatkan hasil kepribadian pengguna
                 $this->load->model('quiz_model');
                 $kasta = $this->quiz_model->get_kasta_detail($match_user->kasta_id ?? 1);
                 ?>
@@ -101,19 +101,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="card-body">
                         <h4 class="mb-3">
                             <?= html_escape($kasta->kasta_name) ?>
-                            <?php if(isset($match_user_linear_position_name)): ?>
-                                <span class="text-muted fs-6"> (<?= html_escape($match_user_linear_position_name) ?>)</span>
-                            <?php endif; ?>
                         </h4>
                         <p><?= html_escape($kasta->description) ?></p>
                         
                         <?php if(isset($match_user_linear_position)): ?>
                             <div class="alert alert-info mt-3">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>Posisi Linear: <?= html_escape($match_user_linear_position_name) ?> (<?= $match_user_linear_position ?>/12)</strong>
+                                <strong>Posisi: <?= $match_user_linear_position ?>/12</strong>
                                 <div class="progress mt-2" style="height: 10px;">
                                     <?php 
-                                    // Hitung persentase dari posisi linear (1-12) untuk progress bar
+                                    // Hitung persentase dari posisi (1-12) untuk progress bar
                                     $progress_percent = (($match_user_linear_position - 1) / 11) * 100;
                                     ?>
                                     <div class="progress-bar bg-primary" role="progressbar" 
@@ -124,9 +121,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 </div>
                             </div>
                             
-                            <?php if(isset($user_linear_position) && isset($user_linear_position_name)): ?>
+                            <?php if(isset($user_linear_position)): ?>
                             <div class="alert alert-secondary mt-3">
-                                <strong>Perbandingan dengan Anda (<?= html_escape($user_linear_position_name) ?>)</strong>
+                                <strong>Perbandingan dengan Anda</strong>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
                                     <span class="small">Anda: <?= $user_linear_position ?>/12</span>
                                     <span class="small">Pencocokan: <?= $match_user_linear_position ?>/12</span>

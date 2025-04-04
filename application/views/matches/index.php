@@ -17,10 +17,10 @@
             <h5 class="card-title mb-0">Kecocokan Berdasarkan Kepribadian Bali</h5>
         </div>
         <div class="card-body">
-            <p>Sistem kami mencocokkan Anda dengan pengguna lain berdasarkan posisi linear kasta (1-12) dari hasil quiz kepribadian Bali.</p>
+            <p>Sistem kami mencocokkan Anda dengan pengguna lain berdasarkan posisi kepribadian (1-12) dari hasil quiz kepribadian Bali.</p>
             <?php if(isset($user_linear_position) && isset($user_linear_position_name)): ?>
                 <div class="alert alert-info">
-                    <strong>Posisi Linear Anda: <?= $user_linear_position_name ?> (<?= $user_linear_position ?>/12)</strong>
+                    <strong>Posisi Anda: <?= $user_linear_position ?>/12</strong>
                     <div class="progress mt-2" style="height: 10px;">
                         <?php 
                         // Hitung persentase dari posisi linear untuk progress bar
@@ -32,7 +32,7 @@
                             aria-valuemin="1" aria-valuemax="12">
                         </div>
                     </div>
-                    <p class="small mt-2 mb-0">Setiap perbedaan 1 tingkat posisi linear = pengurangan kecocokan sebesar 8.33%</p>
+                    <p class="small mt-2 mb-0">Setiap perbedaan 1 tingkat posisi = pengurangan kecocokan sebesar 8.33%</p>
                 </div>
             <?php else: ?>
                 <div class="alert alert-warning">
@@ -116,7 +116,7 @@
                                 <span class="fw-bold"><?= $match->gender ?></span>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span>Match</span>
+                                <span>Kecocokan</span>
                                 <?php if($match->match_score > 0): ?>
                                     <span class="fw-bold text-primary">
                                         <?php 
@@ -135,19 +135,10 @@
                         </div>
                         
                         <div class="match-info mb-3">
+                            <?php if(isset($match->linear_position)): ?>
                             <div class="d-flex justify-content-between">
-                                <span>Kecocokan</span>
-                                <?php if($match->match_score > 0): ?>
-                                <span class="fw-bold text-primary"><?= round($match->match_score) ?>%</span>
-                                <?php else: ?>
-                                <span class="fw-bold text-warning">Belum ada skor</span>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <?php if(isset($match->linear_position) && isset($match->linear_position_name)): ?>
-                            <div class="d-flex justify-content-between">
-                                <span>Posisi Linear</span>
-                                <span class="fw-bold text-secondary"><?= $match->linear_position_name ?> (<?= $match->linear_position ?>/12)</span>
+                                <span>Posisi</span>
+                                <span class="fw-bold text-secondary"><?= $match->linear_position ?>/12</span>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -162,7 +153,7 @@
                                     ?>
                                     <div class="progress-bar bg-warning" role="progressbar" 
                                          style="width: 2%; position: absolute; left: <?= $marker_position ?>%"
-                                         title="Posisi: <?= $match->linear_position_name ?>">
+                                         title="Posisi: <?= $match->linear_position ?>/12">
                                     </div>
                                 <?php endif; ?>
                             <?php else: ?>
