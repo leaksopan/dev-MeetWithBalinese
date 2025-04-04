@@ -142,8 +142,8 @@
                         </div>
                         
                         <div class="d-grid">
-                            <a href="<?= base_url('matches/detail/' . $match->user_id) ?>" class="btn btn-primary">
-                                <i class="fas fa-user me-2"></i> Lihat Profil
+                            <a href="https://www.instagram.com/<?= htmlspecialchars($match->instagram) ?>/" class="btn btn-primary" target="_blank">
+                                <i class="fab fa-instagram me-2"></i> Instagram
                             </a>
                         </div>
                     </div>

@@ -142,6 +142,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <?php if(!empty($match_user->instagram)): ?>
+                <div class="mt-3">
+                    <a href="https://www.instagram.com/<?= html_escape($match_user->instagram) ?>/" class="btn btn-primary w-100" target="_blank">
+                        <i class="fab fa-instagram me-2"></i> Kunjungi Instagram
+                    </a>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     <?php else: ?>
