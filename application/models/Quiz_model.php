@@ -237,10 +237,39 @@ class Quiz_model extends CI_Model {
             // Hitung confidence score (0-100)
             $confidence_score = ($total_weight > 0) ? ($max_score / $total_weight) * 100 : 0;
 
+            // Hitung sub-kasta berdasarkan proporsi kasta dominan
+            // Load model Match_model
+            $this->load->model('match_model');
+            
+            // Buat profil pengguna berdasarkan persentase bobot kasta
+            $user_profile = array();
+            foreach ($kasta_scores as $kasta_id => $score) {
+                $user_profile[$kasta_id] = ($total_weight > 0) ? $score / $total_weight : 0;
+            }
+            
+            // Hitung sub-kasta
+            $dominant_kasta_id = $predicted_kasta;
+            $dominant_weight = ($total_weight > 0) ? $max_score / $total_weight : 0;
+            
+            // Base sub-kasta (1, 4, 7, 10)
+            $base_sub_kasta = ($dominant_kasta_id - 1) * 3 + 1;
+            
+            // Tentukan level sub-kasta (1-3)
+            $sub_kasta_level = 1; // Default level terendah
+            if ($dominant_weight >= 0.8) {
+                $sub_kasta_level = 3; // Sangat dominan - level tertinggi
+            } else if ($dominant_weight >= 0.6) {
+                $sub_kasta_level = 2; // Cukup dominan - level menengah
+            }
+            
+            // Hitung sub_kasta_id final
+            $sub_kasta_id = $base_sub_kasta + $sub_kasta_level - 1;
+
             // Simpan hasil ke database
             $result_data = array(
                 'user_id' => $user_id,
                 'kasta_id' => $predicted_kasta,
+                'sub_kasta_id' => $sub_kasta_id,
                 'confidence_score' => $confidence_score
             );
             
@@ -316,5 +345,116 @@ class Quiz_model extends CI_Model {
         $kasta->description = $kasta_descriptions[$kasta_id] ?? 'Tidak ada deskripsi';
         
         return $kasta;
+    }
+
+    /**
+     * Mendapatkan jawaban user dari database
+     * 
+     * @param int $user_id ID pengguna
+     * @return array Jawaban pengguna
+     */
+    public function get_user_answers($user_id) {
+        try {
+            $this->db->select('q.question_id, ao.option_id, ao.kasta_indicator, ao.weight');
+            $this->db->from('useranswers ua');
+            $this->db->join('questions q', 'ua.question_id = q.question_id');
+            $this->db->join('answeroptions ao', 'ua.selected_option_id = ao.option_id');
+            $this->db->where('ua.user_id', $user_id);
+            return $this->db->get()->result();
+        } catch (Exception $e) {
+            log_message('error', 'Error in get_user_answers: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Simpan hasil kasta pengguna
+     * 
+     * @param int $user_id ID pengguna
+     * @param array $user_answers Jawaban pengguna (hasil dari get_user_answers)
+     * @param int $default_kasta Kasta default jika tidak dapat diprediksi
+     * @return bool Hasil operasi
+     */
+    public function save_kasta_result($user_id, $user_answers = null, $default_kasta = 2) {
+        try {
+            // Jika user_answers tidak disediakan, ambil dari database
+            if ($user_answers === null) {
+                $user_answers = $this->get_user_answers($user_id);
+            }
+            
+            // Jika masih kosong, return false
+            if (empty($user_answers)) {
+                return false;
+            }
+            
+            // Hitung skor untuk masing-masing kasta
+            $kasta_scores = array(
+                1 => 0, // Brahmana
+                2 => 0, // Ksatria
+                3 => 0, // Waisya
+                4 => 0  // Sudra
+            );
+
+            $total_weight = 0;
+            
+            foreach ($user_answers as $answer) {
+                $kasta_scores[$answer->kasta_indicator] += $answer->weight;
+                $total_weight += $answer->weight;
+            }
+
+            // Tentukan kasta dengan skor tertinggi
+            $max_score = 0;
+            $predicted_kasta = 0;
+            
+            foreach ($kasta_scores as $kasta_id => $score) {
+                if ($score > $max_score) {
+                    $max_score = $score;
+                    $predicted_kasta = $kasta_id;
+                }
+            }
+
+            // Jika tidak ada kasta yang terprediksi, beri default
+            if ($predicted_kasta == 0) {
+                $predicted_kasta = $default_kasta;
+            }
+
+            // Hitung confidence score (0-100)
+            $confidence_score = ($total_weight > 0) ? ($max_score / $total_weight) * 100 : 0;
+
+            // Normalisasi profil pengguna untuk perhitungan posisi linear
+            $user_profile = array();
+            foreach ($kasta_scores as $kasta_id => $score) {
+                $user_profile[$kasta_id] = ($total_weight > 0) ? $score / $total_weight : 0;
+            }
+            
+            // Load model Match_model untuk akses ke fungsi perhitungan posisi
+            $this->load->model('match_model');
+            
+            // Hitung posisi dalam skala linear 1-12
+            $linear_position = $this->match_model->get_user_sub_kasta($user_id);
+            
+            // Mencoba simpan atau update hasil kasta
+            $existing_result = $this->db->get_where('userkastaresult', ['user_id' => $user_id])->row();
+            
+            $data = [
+                'user_id' => $user_id,
+                'kasta_id' => $predicted_kasta,
+                'confidence_score' => $confidence_score,
+                'linear_position' => $linear_position,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            if ($existing_result) {
+                $this->db->where('user_id', $user_id);
+                return $this->db->update('userkastaresult', $data);
+            } else {
+                $data['created_at'] = date('Y-m-d H:i:s');
+                return $this->db->insert('userkastaresult', $data);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error in save_kasta_result: ' . $e->getMessage());
+            return false;
+        }
     }
 } 

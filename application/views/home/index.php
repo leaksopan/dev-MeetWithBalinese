@@ -14,7 +14,7 @@
                         // Cek apakah user sudah mengikuti quiz
                         $CI =& get_instance();
                         $CI->load->database();
-                        $result = $CI->db->get_where('UserKastaResult', ['user_id' => $user['user_id']])->row();
+                        $result = $CI->db->get_where('userkastaresult', ['user_id' => $user['user_id']])->row();
                         
                         if (!$result): ?>
                             <div class="d-grid gap-2 d-md-flex">

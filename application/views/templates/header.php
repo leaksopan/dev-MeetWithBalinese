@@ -53,9 +53,18 @@
                         <li class="nav-item">
                             <a class="nav-link" href="<?= base_url('quiz') ?>">Quiz</a>
                         </li>
+                        <?php 
+                        // Cek apakah user sudah memiliki hasil quiz
+                        $CI =& get_instance();
+                        $CI->load->database();
+                        $has_kasta_result = $CI->db->get_where('userkastaresult', ['user_id' => $this->session->userdata('user_id')])->row();
+                        
+                        if ($has_kasta_result): 
+                        ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?= base_url('matches') ?>">Matches</a>
                         </li>
+                        <?php endif; ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?= base_url('auth/logout') ?>">Logout</a>
                         </li>

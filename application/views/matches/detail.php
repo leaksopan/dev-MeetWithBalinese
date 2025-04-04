@@ -21,7 +21,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php if(isset($match) && $match): ?>
                             <?php 
                             $match_score = $match->match_score;
-                            $match_percentage = $match_score . '%';
+                            $match_percentage = number_format($match_score, 1) . '%';
+                            // Jika nilainya bulat (contoh: 85.0), hilangkan desimal
+                            if ($match_score == round($match_score)) {
+                                $match_percentage = round($match_score) . '%';
+                            }
                             $match_color = 'success';
                             
                             if($match_score == 0) {
@@ -80,8 +84,62 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <h5>Kepribadian Bali</h5>
                     </div>
                     <div class="card-body">
-                        <h4 class="mb-3"><?= html_escape($kasta->kasta_name) ?></h4>
+                        <h4 class="mb-3">
+                            <?= html_escape($kasta->kasta_name) ?>
+                            <?php if(isset($match_user_linear_position_name)): ?>
+                                <span class="text-muted fs-6"> (<?= html_escape($match_user_linear_position_name) ?>)</span>
+                            <?php endif; ?>
+                        </h4>
                         <p><?= html_escape($kasta->description) ?></p>
+                        
+                        <?php if(isset($match_user_linear_position)): ?>
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Posisi Linear: <?= html_escape($match_user_linear_position_name) ?> (<?= $match_user_linear_position ?>/12)</strong>
+                                <div class="progress mt-2" style="height: 10px;">
+                                    <?php 
+                                    // Hitung persentase dari posisi linear (1-12) untuk progress bar
+                                    $progress_percent = (($match_user_linear_position - 1) / 11) * 100;
+                                    ?>
+                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                         style="width: <?= $progress_percent ?>%" 
+                                         aria-valuenow="<?= $match_user_linear_position ?>" 
+                                         aria-valuemin="1" aria-valuemax="12">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <?php if(isset($user_linear_position) && isset($user_linear_position_name)): ?>
+                            <div class="alert alert-secondary mt-3">
+                                <strong>Perbandingan dengan Anda (<?= html_escape($user_linear_position_name) ?>)</strong>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="small">Anda: <?= $user_linear_position ?>/12</span>
+                                    <span class="small">Pencocokan: <?= $match_user_linear_position ?>/12</span>
+                                </div>
+                                <?php if ($match_score == 0): ?>
+                                <div class="alert alert-warning mt-2 mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Belum ada skor kecocokan. Salah satu dari Anda belum mengisi quiz.
+                                </div>
+                                <?php else: ?>
+                                <div class="progress mt-1" style="height: 15px;">
+                                    <?php 
+                                    // Posisi marker pada skala 0-100%
+                                    $user_marker = (($user_linear_position - 1) / 11) * 100;
+                                    $match_marker = (($match_user_linear_position - 1) / 11) * 100;
+                                    ?>
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: 2%; position: absolute; left: <?= $user_marker ?>%">
+                                    </div>
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         style="width: 2%; position: absolute; left: <?= $match_marker ?>%">
+                                    </div>
+                                </div>
+                                <p class="small mt-2 mb-0">Perbedaan <?= abs($user_linear_position - $match_user_linear_position) ?> tingkat = pengurangan <?= abs($user_linear_position - $match_user_linear_position) * 8.33 ?>% kecocokan</p>
+                                <?php endif; ?>
+                            </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

@@ -105,6 +105,23 @@ class Quiz extends CI_Controller {
         $data['kasta'] = $this->quiz_model->get_kasta_detail($result->kasta_id);
         $data['confidence_score'] = $result->confidence_score;
         
+        // Ambil informasi posisi linear
+        $this->load->model('match_model');
+        
+        // Gunakan linear_position dari database jika ada, atau hitung jika belum ada
+        $linear_position = isset($result->linear_position) ? $result->linear_position : $this->match_model->get_user_sub_kasta($user_id);
+        
+        if ($linear_position) {
+            $data['linear_position'] = $linear_position;
+            $data['linear_position_name'] = $this->match_model->get_kasta_name_from_position($linear_position);
+            
+            // Simpan informasi linear_position jika belum ada di database
+            if (!isset($result->linear_position)) {
+                $this->db->where('user_id', $user_id);
+                $this->db->update('userkastaresult', ['linear_position' => $linear_position]);
+            }
+        }
+        
         // Load view
         $this->load->view('templates/header');
         $this->load->view('quiz/result', $data);

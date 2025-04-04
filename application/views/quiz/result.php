@@ -13,6 +13,23 @@
                 
                 <h3 class="fw-bold mb-3">Kasta Anda: <?= ucfirst($kasta->kasta_name) ?></h3>
                 
+                <?php if(isset($linear_position_name)): ?>
+                <h5 class="text-muted mb-3">Posisi Linear: <?= $linear_position_name ?></h5>
+                
+                <div class="progress mb-3" style="height: 15px;">
+                    <?php 
+                    // Hitung persentase dari posisi linear (1-12) untuk progress bar
+                    $progress_percent = (($linear_position - 1) / 11) * 100;
+                    ?>
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: <?= $progress_percent ?>%" 
+                         aria-valuenow="<?= $linear_position ?>" 
+                         aria-valuemin="1" aria-valuemax="12">
+                        <?= $linear_position ?>/12
+                    </div>
+                </div>
+                <?php endif; ?>
+                
                 <div class="mb-4">
                     <span class="badge bg-primary p-2">Tingkat Kecocokan: <?= round($confidence_score) ?>%</span>
                 </div>
@@ -21,6 +38,12 @@
                     <div class="card-body">
                         <h5>Tentang Kasta <?= ucfirst($kasta->kasta_name) ?></h5>
                         <p><?= $kasta->description ?></p>
+                        <?php if(isset($linear_position_name)): ?>
+                        <div class="alert alert-info">
+                            <strong>Posisi Spesifik: <?= $linear_position_name ?></strong>
+                            <p class="mb-0 small">Posisi ini menentukan kecocokan Anda dengan orang lain. Setiap perbedaan 1 tingkat akan mengurangi kecocokan sebesar 8.33%.</p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
