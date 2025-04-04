@@ -14,32 +14,10 @@
     
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="card-title mb-0">Kecocokan Berdasarkan Kepribadian Bali</h5>
+            <h5 class="card-title mb-0">Kecocokan Berdasarkan Kepribadian Bali <strong>(V1.0 hanya untuk orang bali asli)</strong></h5>
         </div>
         <div class="card-body">
-            <p>Sistem kami mencocokkan Anda dengan pengguna lain berdasarkan posisi kepribadian dari hasil quiz kepribadian Bali.</p>
-            <?php if(isset($user_linear_position)): ?>
-                <div class="alert alert-info">
-                    <strong>Posisi Kepribadian Anda</strong>
-                    <div class="progress mt-2" style="height: 10px;">
-                        <?php 
-                        // Hitung persentase dari posisi linear untuk progress bar
-                        $progress_percent = (($user_linear_position - 1) / 11) * 100;
-                        ?>
-                        <div class="progress-bar bg-primary" role="progressbar" 
-                            style="width: <?= $progress_percent ?>%" 
-                            aria-valuenow="<?= $user_linear_position ?>" 
-                            aria-valuemin="1" aria-valuemax="12">
-                        </div>
-                    </div>
-                    <p class="small mt-2 mb-0">Semakin dekat posisi kepribadian, semakin tinggi persentase kecocokan.</p>
-                </div>
-            <?php else: ?>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Anda belum mengambil quiz kepribadian Bali. <a href="<?= base_url('quiz') ?>">Ambil quiz sekarang</a> untuk mendapatkan kecocokan yang lebih akurat.
-                </div>
-            <?php endif; ?>
+           
         </div>
     </div>
     
