@@ -10,7 +10,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body text-center">
-                        <img src="<?= base_url('assets/img/profiles/' . ($match_user->profile_image ?: 'default.jpg')) ?>" 
+                        <?php
+                        // Tentukan avatar berdasarkan gender
+                        $gender = ($match_user->gender == 'male') ? 'male' : 'female';
+                        
+                        if ($match_user->profile_image) {
+                            $avatar_path = 'assets/images/avatar/' . $gender . '/' . $match_user->profile_image;
+                        } else {
+                            // Coba gunakan avatar berdasarkan gender
+                            if ($gender == 'male') {
+                                $avatar_path = 'assets/images/avatar/male/Città - Avatar.png';
+                            } else {
+                                $avatar_path = 'assets/images/avatar/female/Allura - Avatar.png';
+                            }
+                        }
+                        ?>
+                        <img src="<?= base_url($avatar_path) ?>" 
                              class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
                         <h3><?= html_escape($match_user->name) ?></h3>
                         <p class="text-muted">

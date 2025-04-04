@@ -67,9 +67,38 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center mb-3">
                             <div class="flex-shrink-0">
-                                <div class="avatar bg-light rounded-circle p-2" style="width: 70px; height: 70px;">
-                                    <i class="fas fa-user fa-2x text-primary"></i>
-                                </div>
+                                <?php
+                                // Tentukan avatar berdasarkan gender dengan case insensitive
+                                $gender_lower = strtolower($match->gender);
+                                $gender = ($gender_lower == 'male') ? 'male' : 'female';
+                                
+                                // Array avatar untuk masing-masing gender
+                                $male_avatars = [
+                                    'assets/images/avatar/male/Città - Avatar.png',
+                                    'assets/images/avatar/male/Città - Avatar (1).png',
+                                    'assets/images/avatar/male/Friendly Ones - Avatar.png',
+                                    'assets/images/avatar/male/Friendly Ones - Avatar and Backdrop.png'
+                                ];
+                                
+                                $female_avatars = [
+                                    'assets/images/avatar/female/Allura - Avatar.png',
+                                    'assets/images/avatar/female/Allura - Avatar (1).png',
+                                    'assets/images/avatar/female/Allura - Avatar (2).png',
+                                    'assets/images/avatar/female/Allura - Avatar (3).png',
+                                    'assets/images/avatar/female/Città - Avatar.png',
+                                    'assets/images/avatar/female/Friendly Ones - Avatar.png',
+                                    'assets/images/avatar/female/Friendly Ones - Avatar (1).png',
+                                    'assets/images/avatar/female/Friendly Ones - Avatar (2).png'
+                                ];
+                                
+                                // Pilih avatar secara acak berdasarkan gender
+                                if ($gender == 'male') {
+                                    $avatar_path = $male_avatars[array_rand($male_avatars)];
+                                } else {
+                                    $avatar_path = $female_avatars[array_rand($female_avatars)];
+                                }
+                                ?>
+                                <img src="<?= base_url($avatar_path) ?>" class="rounded-circle" width="70" height="70" alt="<?= htmlspecialchars($match->username) ?>">
                             </div>
                             <div class="flex-grow-1 ms-3">
                                 <h5 class="mb-1"><?= htmlspecialchars($match->username) ?></h5>
@@ -142,8 +171,8 @@
                         </div>
                         
                         <div class="d-grid">
-                            <a href="https://www.instagram.com/<?= htmlspecialchars($match->instagram) ?>/" class="btn btn-primary" target="_blank">
-                                <i class="fab fa-instagram me-2"></i> Instagram
+                            <a href="<?= base_url('matches/detail/' . $match->user_id) ?>" class="btn btn-primary">
+                                <i class="fas fa-user me-2"></i> Lihat Profil
                             </a>
                         </div>
                     </div>

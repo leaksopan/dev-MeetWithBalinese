@@ -95,4 +95,27 @@ class User_model extends CI_Model {
         }
         return $this->db->get('users')->result();
     }
+
+    /**
+     * Cek apakah user sudah memiliki hasil kasta
+     * 
+     * @param int $user_id ID pengguna
+     * @return bool TRUE jika sudah ada hasil, FALSE jika belum
+     */
+    public function has_kasta_result($user_id) {
+        $query = $this->db->get_where('userkastaresult', ['user_id' => $user_id]);
+        return ($query->num_rows() > 0);
+    }
+
+    /**
+     * Dapatkan detail pengguna berdasarkan ID
+     * 
+     * @param int $user_id ID pengguna
+     * @return object|bool Data detail pengguna atau FALSE jika tidak ditemukan
+     */
+    public function get_user_detail($user_id) {
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get('users');
+        return ($query->num_rows() > 0) ? $query->row() : FALSE;
+    }
 } 
