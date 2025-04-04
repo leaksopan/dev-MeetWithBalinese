@@ -5,7 +5,7 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header border-0 py-4">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Quiz Kasta Bali</h3>
+                    <h3 class="mb-0">Quiz Kepribadian Bali</h3>
                     <div class="quiz-progress">
                         <span id="currentQuestion">1</span> dari <span id="totalQuestions"><?= count($questions) ?></span>
                     </div>
@@ -28,7 +28,7 @@
                         </div>
                     </div>
                     <div class="col-md-8">
-                        <p class="lead">Jawab pertanyaan-pertanyaan berikut dengan jujur untuk menemukan kasta yang paling sesuai dengan kepribadian Anda.</p>
+                        <p class="lead">Jawab pertanyaan-pertanyaan berikut dengan jujur untuk menemukan kepribadian yang paling sesuai dengan diri Anda.</p>
                 
                         <?php echo form_open('quiz/submit', ['id' => 'quizForm']); ?>
                             
@@ -268,9 +268,9 @@
             "Pilih jawaban yang paling sesuai dengan diri Anda!",
             "Ingat, tidak ada jawaban yang salah dalam quiz ini.",
             "Terus lanjutkan! Anda hampir setengah jalan!",
-            "Jawaban Anda membantu kami menemukan kasta yang tepat.",
+            "Jawaban Anda membantu kami menemukan kepribadian yang tepat.",
             "Sebentar lagi selesai, tetap semangat!",
-            "Sedikit lagi, kami akan menunjukkan hasil kastamu!"
+            "Sedikit lagi, kami akan menunjukkan hasil kepribadianmu!"
         ];
         
         // Tombol navigasi
